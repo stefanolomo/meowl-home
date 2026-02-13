@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="assets/positions/south.png">
-    <title>Meowl's Garden - Fixed Horizon</title>
+    <title>Meowl's Garden</title>
     <style>
         * {
             margin: 0;
@@ -182,7 +182,7 @@
             <img src="assets/positions/south.png" alt="Meowl" id="meowl-sprite">
         </div>
         <div class="instructions">
-            Usa las flechas o WASD para moverte por el mundito
+            Use WASD or arrow keys to move
         </div>
     </div>
 
@@ -294,6 +294,8 @@
         let meowlY = window.innerHeight * 0.7;
         const keys = {};
         let currentDirection = 'south';
+        let idleTimeout = null;
+        let isIdle = true;
 
         function getDirection(dx, dy) {
             if (dx === 0 && dy === -1) return 'north';
@@ -305,6 +307,11 @@
             if (dx === 1 && dy === 1) return 'south-east';
             if (dx === -1 && dy === 1) return 'south-west';
             return null;
+        }
+
+        function setIdle() {
+            isIdle = true;
+            meowlSprite.src = 'assets/still.gif';
         }
 
         function move() {
@@ -319,7 +326,6 @@
                 meowlX += dx * speed;
                 meowlY += dy * speed;
 
-                // Límites: No salirse de la pantalla y no subir más allá del horizonte del pasto
                 meowlX = Math.max(0, Math.min(window.innerWidth - 200, meowlX));
                 meowlY = Math.max(window.innerHeight * 0.55, Math.min(window.innerHeight - 200, meowlY));
 
@@ -332,7 +338,13 @@
                     meowlSprite.src = `assets/positions/${currentDirection}.png`;
                 }
 
-                // Profundidad dinámica: Si está más abajo en pantalla, su z-index es mayor
+                if (isIdle) {
+                    isIdle = false;
+                }
+
+                if (idleTimeout) clearTimeout(idleTimeout);
+                idleTimeout = setTimeout(setIdle, 200);
+
                 const currentBottomVH = ((window.innerHeight - meowlY) / window.innerHeight) * 100;
                 meowl.style.zIndex = Math.floor(101 - currentBottomVH);
             }
